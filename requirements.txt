@@ -3,5 +3,6 @@ uvicorn
 ctransformers
 langchain
 langchain-community
+langchain-core
 python-box
-streamlit
+streamlit==1.57.0
