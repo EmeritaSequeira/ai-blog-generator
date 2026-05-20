@@ -9,7 +9,7 @@ load_dotenv()
 @st.cache_resource
 def load_model():
     return ChatGroq(
-        model="llama3-8b-8192",
+        model="llama-3.1-8b-instant",
         api_key=os.getenv("GROQ_API_KEY"),
         temperature=0.01,
         max_tokens=1024
