@@ -1,8 +1,8 @@
-sentence-transformers
 uvicorn
-ctransformers
 langchain
 langchain-community
 langchain-core
+langchain-groq
 python-box
 streamlit==1.57.0
+python-dotenv

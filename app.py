@@ -1,28 +1,29 @@
 import streamlit as st
 from langchain_core.prompts import PromptTemplate
-from langchain_community.llms import CTransformers
+from langchain_groq import ChatGroq
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-# Cache the model so it loads only once across all sessions
 @st.cache_resource
 def load_model():
-    return CTransformers(
-        model='model/llama-2-7b-chat.ggmlv3.q2_K.bin',
-        model_type='llama',
-        n_threads=4,
-        config={'max_new_tokens': 512, 'temperature': 0.01}
+    return ChatGroq(
+        model="llama3-8b-8192",
+        api_key=os.getenv("GROQ_API_KEY"),
+        temperature=0.01,
+        max_tokens=1024
     )
-
 
 def getLLamaresponse(input_text, no_words, blog_style):
     try:
         llm = load_model()
 
-        # Improved prompt for more structured and consistent output
         template = """
-        Write a professional blog post for a {blog_style} audience on the topic: "{input_text}".
-        The blog should be approximately {no_words} words, well-structured with an introduction,
-        body, and conclusion. Use clear and appropriate language for the target audience.
+        Write a complete blog post for a {blog_style} audience on the topic: "{input_text}".
+        The blog should be approximately {no_words} words with three sections:
+        Introduction, Body, and Conclusion.
+        Make sure to finish the Conclusion before stopping.
         """
 
         prompt = PromptTemplate(
@@ -36,15 +37,13 @@ def getLLamaresponse(input_text, no_words, blog_style):
         )
 
         response = llm.invoke(formatted_prompt)
-        return response
+        return response.content
 
     except Exception as e:
-        st.error("Something went wrong while generating the blog. Please try again.")
-        st.exception(e)  # Remove in production
+        st.error("Something went wrong. Please try again.")
+        st.exception(e)
         return None
 
-
-# ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Generate Blogs",
     page_icon='🤖',
@@ -54,7 +53,6 @@ st.set_page_config(
 
 st.header("Generate Blogs 🤖")
 
-# ── Inputs ────────────────────────────────────────────────────────────────────
 input_text = st.text_input("Enter the Blog Topic")
 
 col1, col2 = st.columns([5, 5])
@@ -72,7 +70,6 @@ st.caption("Note: Word count is approximate — LLMs may not match it exactly.")
 
 submit = st.button("Generate")
 
-# ── Generate ──────────────────────────────────────────────────────────────────
 if submit:
     if not input_text.strip():
         st.error("Blog Topic cannot be empty.")
